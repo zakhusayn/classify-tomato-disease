@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Tomato Disease Classification</title>
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --primary-color: #4CAF50;
+                --secondary-color: #388E3C;
+                --accent-color: #8BC34A;
+                --text-light: #ffffff;
+                --text-dark: #333333;
+                --shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                transition: all 0.3s ease;
+            }
+
+            body {
+                background-image: url("{{ url_for('static', filename=background_image) if background_image else '' }}");
+                background-size: cover;
+                background-position: center;
+                background-attachment: fixed;
+                background-color: #f0f8f0; /* Fallback color */
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                color: var(--text-dark);
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                overflow: hidden;
+                position: relative;
+            }
+
+            body::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(135deg, rgba(76, 175, 80, 0.7), rgba(33, 150, 243, 0.5));
+                z-index: -1;
+            }
+
+            .container {
+                background-color: rgba(255, 255, 255, 0.92);
+                border-radius: 15px;
+                box-shadow: var(--shadow);
+                width: 90%;
+                max-width: 800px;
+                height: 90vh;
+                max-height: 700px;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .header {
+                background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+                color: var(--text-light);
+                padding: 20px;
+                text-align: center;
+                position: relative;
+                flex-shrink: 0;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+                margin-bottom: 5px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+            }
+
+            .header p {
+                font-size: 0.9rem;
+                opacity: 0.9;
+            }
+
+            .leaf-icon {
+                position: absolute;
+                font-size: 4rem;
+                opacity: 0.1;
+                top: -10px;
+                right: 10px;
+                transform: rotate(15deg);
+            }
+
+            .content {
+                padding: 20px;
+                flex: 1;
+                overflow-y: auto;
+                /* Hide scrollbar for Chrome, Safari and Opera */
+                &::-webkit-scrollbar {
+                    display: none;
+                }
+                /* IE and Edge */
+                -ms-overflow-style: none;
+                /* Firefox */
+                scrollbar-width: none;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 500;
+                color: var(--text-dark);
+            }
+
+            select {
+                width: 100%;
+                padding: 12px 15px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                background-color: #f9f9f9;
+                font-size: 1rem;
+                color: var(--text-dark);
+                cursor: pointer;
+                outline: none;
+                appearance: none;
+                background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+                background-repeat: no-repeat;
+                background-position: right 15px top 50%;
+                background-size: 12px auto;
+            }
+
+            select:focus {
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+            }
+
+            .file-input-container {
+                position: relative;
+                margin-top: 10px;
+                border: 2px dashed #ddd;
+                border-radius: 10px;
+                padding: 20px 15px;
+                text-align: center;
+                background-color: #f9f9f9;
+                cursor: pointer;
+            }
+
+            .file-input-container:hover {
+                border-color: var(--primary-color);
+                background-color: #f0f7f0;
+            }
+
+            .file-input-container input {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                opacity: 0;
+                cursor: pointer;
+            }
+
+            .file-input-icon {
+                font-size: 2rem;
+                color: var(--primary-color);
+                margin-bottom: 8px;
+            }
+
+            .file-input-text {
+                font-size: 0.9rem;
+                color: #666;
+            }
+
+            .file-input-text strong {
+                color: var(--primary-color);
+            }
+
+            button {
+                display: block;
+                width: 100%;
+                padding: 12px;
+                background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                box-shadow: var(--shadow);
+                margin-top: 10px;
+                position: relative;
+                overflow: hidden;
+            }
+
+            button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 7px 14px rgba(0, 0, 0, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+            }
+
+            button::after {
+                content: "";
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: -100%;
+                background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+                animation: shine 2s infinite;
+            }
+
+            @keyframes shine {
+                100% {
+                    left: 100%;
+                }
+            }
+
+            .results {
+                margin-top: 20px;
+                padding-top: 15px;
+                border-top: 1px solid #eee;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .result-card {
+                background-color: #f9f9f9;
+                border-radius: 10px;
+                padding: 15px;
+                width: 100%;
+                box-shadow: var(--shadow);
+                margin-bottom: 15px;
+            }
+
+            .prediction {
+                font-size: 1.3rem;
+                font-weight: 600;
+                color: var(--primary-color);
+                margin-bottom: 5px;
+            }
+
+            .confidence {
+                font-size: 1rem;
+                color: #555;
+                margin-bottom: 10px;
+            }
+
+            .confidence-bar {
+                height: 8px;
+                width: 100%;
+                background-color: #e0e0e0;
+                border-radius: 5px;
+                overflow: hidden;
+                margin-bottom: 10px;
+            }
+
+            .confidence-fill {
+                height: 100%;
+                background: linear-gradient(to right, var(--accent-color), var(--primary-color));
+                border-radius: 5px;
+                width: {% if probability %}{{ (probability|float * 100)|int }}{% else %}0{% endif %}%;
+            }
+
+            .image-container {
+                width: 100%;
+                max-width: 400px;
+                margin: 15px auto 0;
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: var(--shadow);
+                position: relative;
+            }
+
+            .uploaded-image {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+
+            .image-overlay {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background-color: rgba(0, 0, 0, 0.6);
+                color: white;
+                padding: 5px 8px;
+                border-radius: 15px;
+                font-size: 0.8rem;
+            }
+
+            footer {
+                padding: 10px;
+                text-align: center;
+                font-size: 0.8rem;
+                color: #666;
+                background-color: #f5f5f5;
+                border-top: 1px solid #eee;
+                flex-shrink: 0;
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    width: 95%;
+                    height: 95vh;
+                }
+
+                .header h1 {
+                    font-size: 1.5rem;
+                }
+
+                .content {
+                    padding: 15px;
+                }
+
+                .leaf-icon {
+                    font-size: 3rem;
+                }
+            }
+
+            /* Custom file input name display */
+            #file-name {
+                margin-top: 8px;
+                font-size: 0.8rem;
+                color: var(--primary-color);
+                font-weight: 500;
+                word-break: break-all;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <i class="fas fa-leaf leaf-icon"></i>
+                <h1>Tomato Disease Classification</h1>
+                <p>Upload an image to detect tomato plant diseases</p>
+            </div>
+
+            <div class="content">
+                <form
+                    method="POST"
+                    action="/predict"
+                    enctype="multipart/form-data"
+                    id="predict-form"
+                >
+                    <div class="form-group">
+                        <input
+                            type="hidden"
+                            name="model_type"
+                            id="model_type"
+                            value="tomato"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Upload Tomato Plant Image:</label>
+                        <div class="file-input-container">
+                            <i
+                                class="fas fa-cloud-upload-alt file-input-icon"
+                            ></i>
+                            <div class="file-input-text">
+                                Drag and drop image or <strong>browse</strong>
+                            </div>
+                            <div id="file-name"></div>
+                            <input
+                                type="file"
+                                name="file"
+                                id="file-input"
+                                accept="image/*"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <button type="submit">
+                        <i class="fas fa-search-plus"></i> Analyze Tomato Plant
+                    </button>
+                </form>
+
+                {% if image %}
+                <div class="results">
+                    <div class="result-card">
+                        <div class="prediction">
+                            <i class="fas fa-diagnoses"></i> {{ class_name }}
+                        </div>
+                        <div class="confidence">
+                            Confidence: {{ "%.2f%%"|format(probability|float *
+                            100) }}
+                        </div>
+                        <div class="confidence-bar">
+                            <div
+                                class="confidence-fill"
+                                style="width: {{ (probability|float * 100)|int }}%;"
+                            ></div>
+                        </div>
+                    </div>
+
+                    <div class="image-container">
+                        <img
+                            src="data:image/jpeg;base64,{{ image }}"
+                            alt="Uploaded Tomato Plant Image"
+                            class="uploaded-image"
+                        />
+                        <div class="image-overlay">
+                            <i class="fas fa-image"></i> Analyzed Image
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="results">
+                    <div class="image-container">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 400 300"
+                            class="uploaded-image"
+                        >
+                            <!-- Sky background -->
+                            <rect width="400" height="300" fill="#e8f5e9" />
+
+                            <!-- Sun -->
+                            <circle cx="350" cy="50" r="30" fill="#FFD54F" />
+                            <circle
+                                cx="350"
+                                cy="50"
+                                r="40"
+                                fill="#FFD54F"
+                                opacity="0.3"
+                            />
+
+                            <!-- Ground -->
+                            <rect
+                                x="0"
+                                y="220"
+                                width="400"
+                                height="80"
+                                fill="#A5D6A7"
+                            />
+
+                            <!-- Tomato plant stem -->
+                            <path
+                                d="M200 220 L200 150 L180 130 M200 150 L220 130 M200 180 L170 160 M200 180 L230 160"
+                                stroke="#558B2F"
+                                stroke-width="5"
+                                fill="none"
+                            />
+
+                            <!-- Tomato plant leaves -->
+                            <path
+                                d="M180 130 Q165 125, 160 110 Q155 95, 165 85 Q175 80, 185 90 Q190 100, 180 130"
+                                fill="#66BB6A"
+                            />
+                            <path
+                                d="M220 130 Q235 125, 240 110 Q245 95, 235 85 Q225 80, 215 90 Q210 100, 220 130"
+                                fill="#66BB6A"
+                            />
+                            <path
+                                d="M170 160 Q155 155, 145 140 Q140 125, 150 115 Q160 110, 175 120 Q180 130, 170 160"
+                                fill="#66BB6A"
+                            />
+                            <path
+                                d="M230 160 Q245 155, 255 140 Q260 125, 250 115 Q240 110, 225 120 Q220 130, 230 160"
+                                fill="#66BB6A"
+                            />
+
+                            <!-- Tomatoes -->
+                            <circle cx="175" cy="105" r="12" fill="#E53935" />
+                            <circle cx="225" cy="105" r="10" fill="#E53935" />
+                            <circle cx="160" cy="135" r="10" fill="#E53935" />
+                            <circle cx="240" cy="135" r="12" fill="#E53935" />
+
+                            <!-- Highlights on tomatoes -->
+                            <circle cx="172" cy="102" r="3" fill="#FFEBEE" />
+                            <circle cx="222" cy="102" r="2" fill="#FFEBEE" />
+                            <circle cx="157" cy="132" r="2" fill="#FFEBEE" />
+                            <circle cx="237" cy="132" r="3" fill="#FFEBEE" />
+
+                            <!-- Text -->
+                            <text
+                                x="200"
+                                y="260"
+                                font-family="Arial"
+                                font-size="14"
+                                text-anchor="middle"
+                                fill="#37474F"
+                            >
+                                Upload a tomato plant image to detect diseases
+                            </text>
+                        </svg>
+                        <div class="image-overlay">
+                            <i class="fas fa-image"></i> Sample Image
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <footer>
+                <p>© 2025 Tomato Disease Classification System</p>
+            </footer>
+        </div>
+
+        <script>
+            // Display file name when selected
+            document
+                .getElementById("file-input")
+                .addEventListener("change", function (e) {
+                    const fileName = e.target.files[0]
+                        ? e.target.files[0].name
+                        : "";
+                    document.getElementById("file-name").textContent = fileName;
+                });
+
+            // Add dragging effects
+            const dropArea = document.querySelector(".file-input-container");
+
+            ["dragenter", "dragover", "dragleave", "drop"].forEach(
+                (eventName) => {
+                    dropArea.addEventListener(
+                        eventName,
+                        preventDefaults,
+                        false,
+                    );
+                },
+            );
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ["dragenter", "dragover"].forEach((eventName) => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+
+            ["dragleave", "drop"].forEach((eventName) => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dropArea.style.borderColor = "#4CAF50";
+                dropArea.style.backgroundColor = "#e8f5e9";
+            }
+
+            function unhighlight() {
+                dropArea.style.borderColor = "#ddd";
+                dropArea.style.backgroundColor = "#f9f9f9";
+            }
+
+            dropArea.addEventListener("drop", handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                document.getElementById("file-input").files = files;
+
+                if (files[0]) {
+                    document.getElementById("file-name").textContent =
+                        files[0].name;
+                }
+            }
+        </script>
+    </body>
+</html>

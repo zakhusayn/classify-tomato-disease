@@ -1,0 +1,5 @@
+.venv/
+.ropeproject/
+__pycache__/
+Research/
+tomato_model_statedict__f.pth

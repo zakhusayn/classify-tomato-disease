@@ -1,0 +1,8 @@
+torch<2
+torchvision
+gradio
+Pillow
+Flask
+numpy<2
+opencv-python-headless
+requests
