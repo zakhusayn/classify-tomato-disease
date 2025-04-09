@@ -1,2 +1,5 @@
 [start]
 cmd = "gunicorn app:app"
+
+[env]
+PYTHON_VERSION = "3.9"
