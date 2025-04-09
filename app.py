@@ -6,17 +6,20 @@ from predict import predict_potato, predict_tomato
 from model import tomato_model
 import torch
 
+import gdown
 app = Flask(__name__)
 
 import zipfile
 
 # Unzip file
-with zipfile.ZipFile("tomato_model_statedict_f.pth.zip", 'r') as zip_ref:
-    zip_ref.extractall("tomato_model_statedict_f")  # or specify any target directory
+# https://drive.google.com/file/d/1NrzbwtWIeKbKCkA1Pz97CkM2pdfRcqDE/view?usp=drive_link
+gdown.download('https://drive.google.com/uc?id=1NrzbwtWIeKbKCkA1Pz97CkM2pdfRcqDE', 'tomato_model.zip', quiet=False)
+with zipfile.ZipFile('tomato_model.zip', 'r') as zip_ref:
+    zip_ref.extractall("tomato_model")  # or specify any target directory
 
 
 # Load models
-tomato_model.load_state_dict(torch.load("tomato_model_statedict_f/tomato_model_statedict_f.pth", map_location=torch.device('cpu')))
+tomato_model.load_state_dict(torch.load("tomato_model/tomato_model_statedict_f.pth", map_location=torch.device('cpu')))
 
 @app.route('/')
 def home():
