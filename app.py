@@ -13,13 +13,13 @@ import zipfile
 
 # Unzip file
 # https://drive.google.com/file/d/1NrzbwtWIeKbKCkA1Pz97CkM2pdfRcqDE/view?usp=drive_link
-gdown.download('https://drive.google.com/uc?id=1NrzbwtWIeKbKCkA1Pz97CkM2pdfRcqDE', 'tomato_model.zip', quiet=False)
-with zipfile.ZipFile('tomato_model.zip', 'r') as zip_ref:
-    zip_ref.extractall("tomato_model")  # or specify any target directory
+# gdown.download('https://drive.google.com/uc?id=1NrzbwtWIeKbKCkA1Pz97CkM2pdfRcqDE', 'tomato_model.zip', quiet=False)
+# with zipfile.ZipFile('tomato_model.zip', 'r') as zip_ref:
+#     zip_ref.extractall("tomato_model")  # or specify any target directory
 
 
-# Load models
-tomato_model.load_state_dict(torch.load("tomato_model/tomato_model_statedict_f.pth", map_location=torch.device('cpu')))
+# # Load models
+# tomato_model.load_state_dict(torch.load("tomato_model/tomato_model_statedict_f.pth", map_location=torch.device('cpu')))
 
 @app.route('/')
 def home():
