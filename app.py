@@ -9,7 +9,7 @@ import torch
 app = Flask(__name__)
 
 # Load models
-tomato_model.load_state_dict(torch.load("Model/tomato_model_statedict_f.pth", map_location=torch.device('cpu')))
+tomato_model.load_state_dict(torch.load("tomato_model_statedict_f.pth", map_location=torch.device('cpu')))
 
 @app.route('/')
 def home():
